@@ -5,6 +5,16 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+def clean_author(name):
+    """ make the author name of the form 'last, x', where 'x' is the first initial"""
+    parts = name.split(",")
+    lastname = parts[0].strip().lower()
+    try:
+        fi = parts[1].strip().lower()[0]
+        return "{}, {}".format(lastname, fi)
+    except IndexError:
+        return lastname
+
 class AuthorPapers:
 
     def __init__(self, name):
@@ -20,17 +30,17 @@ class AuthorPapers:
         """get the list of unique coauthor lastnames"""
         a = []
         for p in self.mypapers:
-            a += [q.split()[0] for q in p.author]
+            a += [clean_author(q) for q in p.author]
         return sorted(set(a))
 
     def get_num_connections(self, coauthor, year=0):
         """return the number of papers shared with coauthor"""
-        colast = coauthor.split()[0].replace(",", "")
+        colast = clean_author(coauthor)
         n = 0
         for p in self.mypapers:
             for auth in p.author:
-                authlast = auth.split()[0].replace(",", "")
-                if colast.lower() == authlast.lower():
+                authlast = clean_author(auth)
+                if colast == authlast:
                     n += 1
         return n
 
@@ -49,7 +59,7 @@ class TeamMember:
     def show_connections(self):
         for c in self.coauthors:
             print(c, self.coauthors[c])
-
+        print()
 
 def create_network(names, layout="spring", outfile="authors.png"):
 
