@@ -108,12 +108,3 @@ def create_network(names, layout="spring", outfile="authors.png"):
     plt.savefig(outfile)
 
 
-if __name__ == "__main__":
-
-    names = ["Fryer, C",
-             "Hartmann, D",
-             "Kouveliotou, C",
-             "White, N",
-             "Zingale, M"]
-
-    create_network(names)
