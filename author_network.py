@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import ads
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 
 class AuthorPapers:
 
@@ -48,26 +51,59 @@ class TeamMember:
             print(c, self.coauthors[c])
 
 
-names = ["Fryer, C",
-         "Hartmann, D",
-         "Kouveliotou, C",
-         "White, N",
-         "Zingale, M"]
+def create_network(names, layout="spring", outfile="authors.png"):
+
+    team = {}
+
+    for nm in names:
+        print(f"Team member {nm}")
+        team[nm] = TeamMember(nm)
+        for cauth in names:
+            if nm == cauth:
+                continue
+            team[nm].add_coauthor(cauth)
+        team[nm].show_connections()
+
+    G = nx.Graph()
+
+    for nm in names:
+        for cauth in team[nm].coauthors:
+            num = team[nm].coauthors[cauth]
+            if num > 0:
+                G.add_edge(nm, cauth, weight=num)
+
+    if layout == "spring":
+        pos = nx.spring_layout(G)
+    elif layout == "circle":
+        pos = nx.circular_layout(G)
+
+    nx.draw_networkx_nodes(G, pos, node_size=400)
+
+    edges, weights = zip(*nx.get_edge_attributes(G, 'weight').items())
+    weights = np.clip(np.array(weights), 1, 10)
+
+    colors = np.arange(len(weights)) + 1
+    nx.draw_networkx_edges(G, pos, edgelist=edges, width=weights,
+                           edge_color=colors)
+
+    # raise the text positions
+    for p in pos:
+        pos[p][1] += 0.1
+    nx.draw_networkx_labels(G, pos, zorder=100, font_size=10)
 
 
-team = {}
-
-for nm in names:
-    print(f"Team member {nm}")
-    team[nm] = TeamMember(nm)
-    for cauth in names:
-        if nm == cauth:
-            continue
-        team[nm].add_coauthor(cauth)
-    team[nm].show_connections()
+    plt.axis("off")
+    plt.margins(0.1)
+    #plt.tight_layout()
+    plt.savefig(outfile)
 
 
-me = AuthorPapers("Zingale, M")
-#print(me.get_coauthors())
-print(me.get_num_connections("Almgren"))
+if __name__ == "__main__":
 
+    names = ["Fryer, C",
+             "Hartmann, D",
+             "Kouveliotou, C",
+             "White, N",
+             "Zingale, M"]
+
+    create_network(names)
