@@ -17,13 +17,19 @@ def clean_author(name):
 
 class AuthorPapers:
 
-    def __init__(self, name):
+    def __init__(self, name, year=None):
         p = list(ads.SearchQuery(author=name,
                                  max_pages=10,
                                  fl=["id", "bibcode", "citation_count",
                                      "author", "year", "property"]))
 
-        self.mypapers = p
+        # filter by year, if desired
+        if year is None:
+            self.mypapers = p
+        else:
+            pyr = [q for q in p if int(q.year) >= year]
+            self.mypapers = pyr
+
         self.num = len(self.mypapers)
 
     def get_coauthors(self):
@@ -47,9 +53,9 @@ class AuthorPapers:
 
 class TeamMember:
 
-    def __init__(self, name):
+    def __init__(self, name, year=None):
 
-        self.papers = AuthorPapers(name)
+        self.papers = AuthorPapers(name, year=year)
 
         self.coauthors = {}
 
@@ -61,13 +67,14 @@ class TeamMember:
             print(c, self.coauthors[c])
         print()
 
-def create_network(names, layout="spring", outfile="authors.png"):
+def create_network(names, year=None,
+                   layout="spring", outfile="authors.png"):
 
     team = {}
 
     for nm in names:
         print(f"Team member {nm}")
-        team[nm] = TeamMember(nm)
+        team[nm] = TeamMember(nm, year=year)
         for cauth in names:
             if nm == cauth:
                 continue
