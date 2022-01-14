@@ -106,7 +106,7 @@ def create_network(names, year=None,
     # raise the text positions
     for p in pos:
         pos[p][1] += 0.1
-    nx.draw_networkx_labels(G, pos, zorder=100, font_size=10)
+    nx.draw_networkx_labels(G, pos, font_size=10)
 
 
     plt.axis("off")
